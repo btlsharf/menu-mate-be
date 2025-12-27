@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from database import get_db
 from models.user import UserModel
-from serializers.user import UserSignUp, UserSignIn
+from serializers.user_serializer import UserSignUp, UserSignIn
 
 router = APIRouter()
 
