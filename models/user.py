@@ -1,36 +1,15 @@
-from sqlalchemy import Column, Integer, String
-from .base import BaseModel
-from passlib.context import CryptContext
-from datetime import datetime, timezone, timedelta
-import jwt
-from config.environment import secret
-from sqlalchemy.orm import relationship # add relationship
+from sqlalchemy import Column, Integer, String, DateTime
+from sqlalchemy.orm import relationship
+from datetime import datetime
+from config.database import Base
 
-
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-
-class UserModel(BaseModel):
-
+class User(Base):
     __tablename__ = "users"
 
     id = Column(Integer, primary_key=True, index=True)
-    username = Column(String, nullable=False, unique=True)
-    email = Column(String, nullable=False, unique=True)
-    password_hash = Column(String, nullable=True)
+    email = Column(String, unique=True, index=True, nullable=False)
+    password_hash = Column(String, nullable=False)
+    role = Column(String, default="user", nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow)
 
-    def set_password(self, password: str):
-        self.password_hash = pwd_context.hash(password)
-
-    def verify_password(self, password: str) -> bool:
-        return pwd_context.verify(password, self.password_hash)
-
-    def generate_token(self):
-        payload = {
-            "exp": datetime.now(timezone.utc) + timedelta(days=1),
-            "iat": datetime.now(timezone.utc),
-            "sub": str(self.id),
-        }
-
-        token = jwt.encode(payload, secret, algorithm="HS256")
-
-        return token
+    orders = relationship("Order", back_populates="user")
